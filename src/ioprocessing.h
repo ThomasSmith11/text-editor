@@ -106,11 +106,9 @@ namespace io {
                 } else if (key == KEY_LEFT) {
                     x--;
                 }
-                y = max(0, min(y, static_cast<int>(this->textBuffer.size())-1));
-                x = max(0, min(x, static_cast<int>(this->textBuffer[y].size())));
-        
+
                 y = max(0, min(y, LINES-4));
-                x = max(0, min(x, static_cast<int>(this->textBuffer[y].size())));
+                x = max(0, min(x, static_cast<int>(this->textBuffer[y+this->currentTopLine].size())));
                 wmove(this->window, y, x);
                 wrefresh(this->window);
             }

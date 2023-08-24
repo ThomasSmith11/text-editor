@@ -45,23 +45,39 @@ namespace io {
                 }
                 wrefresh(this->window);
             }
+            
+            void displayCommand(string command) {
+                string whitespace(command.length()+1, ' ');
 
-             void processCommand(vector<char> command) {
-                string commandStr;
-                for (char ch : command) {
-                        commandStr += ch;
-                }
-                if (commandStr == ":q"){
+                const char* cStr = new char[command.length() + 1];
+                strcpy(const_cast<char*>(cStr), command.c_str());
+                const char* whitespaceStr = new char[whitespace.length() + 1];
+                strcpy(const_cast<char*>(whitespaceStr), whitespace.c_str());
+
+                wmove(this->window, LINES-2, 0);
+                wprintw(this->window, "%s", whitespaceStr);
+                wmove(this->window, LINES-2, 0);
+                wprintw(this->window, "%s", cStr);
+                wmove(this->window, LINES-2, command.length());
+            }
+
+            void processCommand(string command) {
+                if (command == ":q"){
                     delwin(this->window);
                     endwin();
                     exit(0);
                 }
-                if (commandStr == ":qs"){
+                if (command == ":qs"){
                     saveToFile();
                     delwin(this->window);
                     endwin();
                     exit(0);
                 }
+                if (command == ":s"){
+                    saveToFile();
+                    wmove(this->window, LINES-2, 0);
+                    wprintw(this->window, "               ");
+                }              
             }
             
 
@@ -161,16 +177,20 @@ namespace io {
             }
             
             void processEscapeSequence() {
-                echo();
-                std::vector<char> command;
+                string command;
                 int nextChar;
                 nextChar = wgetch(this->window);
                 while (nextChar != 10) {
-                    command.push_back(nextChar);
+                    if (nextChar == KEY_BACKSPACE && !command.empty()) {
+                        command.pop_back();
+                    }
+                    else if (nextChar != KEY_BACKSPACE) {
+                        command += static_cast<char>(nextChar);
+                    }
+                    displayCommand(command);
                     nextChar = wgetch(this->window);
                 }
                 processCommand(command);
-                noecho();
             }
     };
     string processor::emptyString = "";

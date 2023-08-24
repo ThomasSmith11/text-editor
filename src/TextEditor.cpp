@@ -35,6 +35,7 @@ int main(int argc, char** argv) {
             wmove(textwin, LINES-2, 0);
             wrefresh(textwin);
             processor.processEscapeSequence();
+            wmove(textwin, cursorYPos, cursorXPos);
         }
         else if (ch == KEY_UP || ch == KEY_DOWN || ch == KEY_LEFT || ch == KEY_RIGHT) {
             processor.processArrowKey(ch, cursorXPos, cursorYPos);

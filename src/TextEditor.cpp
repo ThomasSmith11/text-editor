@@ -13,8 +13,10 @@ int main(int argc, char** argv) {
     initscr();
     cbreak();
 
-    WINDOW *textwin = newwin(LINES-2, COLS, 0, 0);
+    WINDOW *textwin = newwin(LINES-1, COLS, 0, 0);
     keypad(textwin, TRUE);
+    noecho();
+    ESCDELAY = 0;
     
     std::vector<std::string> fileState;
 
@@ -30,15 +32,9 @@ int main(int argc, char** argv) {
     while (true) {
         ch = wgetch(textwin);
         if (ch == 27) {
-            wmove(stdscr, LINES-1, 0);
-            std::vector<char> command;
-            int nextChar;
-            nextChar = wgetch(textwin);
-            while (nextChar != 10) {
-                command.push_back(nextChar);
-                nextChar = wgetch(textwin);
-            }
-            processor.processCommand(command);
+            wmove(textwin, LINES-2, 0);
+            wrefresh(textwin);
+            processor.processEscapeSequence();
         }
         else if (ch == KEY_UP || ch == KEY_DOWN || ch == KEY_LEFT || ch == KEY_RIGHT) {
             processor.processArrowKey(ch, cursorXPos, cursorYPos);

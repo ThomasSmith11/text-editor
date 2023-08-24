@@ -17,6 +17,7 @@ namespace io {
             const char* filename;
             WINDOW *window;
             vector<string> textBuffer;
+            int currentTopLine = 0;
             
             void saveToFile() {
                 ofstream outputFile(this->filename);
@@ -33,13 +34,34 @@ namespace io {
             
             void renderDoc() {
                 wclear(this->window);
-                for (string line : this->textBuffer) {
+                int i = 0;
+                while (i < LINES-3) {
+                    string line = this->textBuffer[this->currentTopLine+i];
                     line+="\n";
                     const char* cStr = new char[line.length() + 1];
                     strcpy(const_cast<char*>(cStr), line.c_str());
                     wprintw(this->window, "%s", cStr);
+                    i++;
                 }
                 wrefresh(this->window);
+            }
+
+             void processCommand(vector<char> command) {
+                string commandStr;
+                for (char ch : command) {
+                        commandStr += ch;
+                }
+                if (commandStr == ":q"){
+                    delwin(this->window);
+                    endwin();
+                    exit(0);
+                }
+                if (commandStr == ":qs"){
+                    saveToFile();
+                    delwin(this->window);
+                    endwin();
+                    exit(0);
+                }
             }
             
 
@@ -66,36 +88,28 @@ namespace io {
                 renderDoc();
             }
 
-            void processCommand(vector<char> command) {
-                string commandStr;
-                for (char ch : command) {
-                        commandStr += ch;
-                }
-                if (commandStr == ":q"){
-                    delwin(this->window);
-                    endwin();
-                    exit(0);
-                }
-                if (commandStr == ":qs"){
-                    saveToFile();
-                    delwin(this->window);
-                    endwin();
-                    exit(0);
-                }
-            }
-
             void processArrowKey(int key, int& x, int& y) {
                 if (key == KEY_UP) {
                     y--;
+                    if (y<0 && this->currentTopLine != 0) {
+                        this->currentTopLine--;
+                        renderDoc();
+                    }
                 } else if (key == KEY_DOWN) {
                     y++;
+                    if (y>LINES-4 && this->currentTopLine+LINES-4 != this->textBuffer.size()-1) {
+                        this->currentTopLine++;
+                        renderDoc();
+                    }
                 } else if (key == KEY_RIGHT) {
                     x++;
                 } else if (key == KEY_LEFT) {
                     x--;
                 }
-
                 y = max(0, min(y, static_cast<int>(this->textBuffer.size())-1));
+                x = max(0, min(x, static_cast<int>(this->textBuffer[y].size())));
+        
+                y = max(0, min(y, LINES-4));
                 x = max(0, min(x, static_cast<int>(this->textBuffer[y].size())));
                 wmove(this->window, y, x);
                 wrefresh(this->window);
@@ -146,6 +160,19 @@ namespace io {
                 x++;
                 renderDoc();
                 wmove(this->window, y, x);
+            }
+            
+            void processEscapeSequence() {
+                echo();
+                std::vector<char> command;
+                int nextChar;
+                nextChar = wgetch(this->window);
+                while (nextChar != 10) {
+                    command.push_back(nextChar);
+                    nextChar = wgetch(this->window);
+                }
+                processCommand(command);
+                noecho();
             }
     };
     string processor::emptyString = "";

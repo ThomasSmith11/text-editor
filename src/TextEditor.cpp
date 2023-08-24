@@ -46,6 +46,9 @@ int main(int argc, char** argv) {
         else if (ch == KEY_BACKSPACE) {
             processor.processDelete(cursorXPos, cursorYPos);
         }
+        else if (ch == 9) {
+            processor.processTab(cursorXPos, cursorYPos);
+        }
         else {
             processor.processNormalKey(ch, cursorXPos, cursorYPos);
         }

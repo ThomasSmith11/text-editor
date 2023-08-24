@@ -36,6 +36,9 @@ namespace io {
                 wclear(this->window);
                 int i = 0;
                 while (i < LINES-3) {
+                    if (i >= static_cast<int>(this->textBuffer.size())) {
+                        break;
+                    }
                     string line = this->textBuffer[this->currentTopLine+i];
                     line+="\n";
                     const char* cStr = new char[line.length() + 1];
@@ -67,7 +70,7 @@ namespace io {
                     endwin();
                     exit(0);
                 }
-                if (command == ":qs"){
+                if (command == ":qs" || command == ":sq"){
                     saveToFile();
                     delwin(this->window);
                     endwin();
@@ -123,7 +126,7 @@ namespace io {
                     x--;
                 }
 
-                y = max(0, min(y, LINES-4));
+                y = max(0, min(static_cast<int>(this->textBuffer.size())-1, min(y, LINES-4)));
                 x = max(0, min(x, static_cast<int>(this->textBuffer[y+this->currentTopLine].size())));
                 wmove(this->window, y, x);
                 wrefresh(this->window);
@@ -166,6 +169,14 @@ namespace io {
                     renderDoc();
                     wmove(this->window, y, x);
                 }
+            }
+            
+            void processTab(int& x, int& y) {
+                wprintw(this->window, "Recieved tab input");
+                this->textBuffer[y].insert(x, 4, ' ');
+                x += 4;
+                renderDoc();
+                wmove(this->window, y, x);
             }
             
             void processNormalKey(int key, int& x, int& y) {

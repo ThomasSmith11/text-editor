@@ -133,21 +133,29 @@ namespace io {
             }
 
             void processReturn(int& x, int& y) {
-                bool cursorAtEndOfLine = (static_cast<int>(this->textBuffer[y].size()) == x);
+                bool cursorAtEndOfLine = (static_cast<int>(this->textBuffer[y + this->currentTopLine].size()) == x);
                 if (cursorAtEndOfLine) {
                     y++;
                     x = 0;
-                    this->textBuffer.insert(this->textBuffer.begin() + y, emptyString);
+                    this->textBuffer.insert(this->textBuffer.begin() + y + this->currentTopLine, emptyString);
+                    if (y>LINES-4 && this->currentTopLine+LINES-4 != this->textBuffer.size()-1) {
+                        this->currentTopLine++;
+                        y=LINES-4;
+                    }
                     renderDoc();
                     wmove(this->window, y, x);
                 }
                 else {
-                    string substringOne = this->textBuffer[y].substr(0,x);
-                    string substringTwo = this->textBuffer[y].substr(x, static_cast<int>(this->textBuffer[y].size()));
-                    this->textBuffer[y] = substringOne;
+                    string substringOne = this->textBuffer[y+this->currentTopLine].substr(0,x);
+                    string substringTwo = this->textBuffer[y+this->currentTopLine].substr(x, static_cast<int>(this->textBuffer[y + this->currentTopLine].size()));
+                    this->textBuffer[y + this->currentTopLine] = substringOne;
                     y++;
                     x=0;
-                    this->textBuffer.insert(this->textBuffer.begin() + y, substringTwo);
+                    this->textBuffer.insert(this->textBuffer.begin() + y + this->currentTopLine, substringTwo);
+                    if (y>LINES-4) {
+                        this->currentTopLine++;
+                        y=LINES-4;
+                    }
                     renderDoc();
                     wmove(this->window, y, x);
                 }
@@ -155,17 +163,26 @@ namespace io {
             
             void processDelete(int& x, int& y) {
                 if (x != 0) {
-                    this->textBuffer[y].erase(x-1, 1);
+                    this->textBuffer[y + this->currentTopLine].erase(x-1, 1);
                     x--;
                     renderDoc();
                     wmove(this->window, y, x);
                 }
                 else if (x == 0 && y != 0) {
-                    string line = this->textBuffer[y];
-                    this->textBuffer.erase(this->textBuffer.begin() + y);
+                    string line = this->textBuffer[y + this->currentTopLine];
+                    this->textBuffer.erase(this->textBuffer.begin() + y + this->currentTopLine);
                     y--;
-                    x = static_cast<int>(this->textBuffer[y].size());
-                    this->textBuffer[y] += line;
+                    x = static_cast<int>(this->textBuffer[y+ this->currentTopLine].size());
+                    this->textBuffer[y + this->currentTopLine] += line;
+                    renderDoc();
+                    wmove(this->window, y, x);
+                }
+                else if (x == 0 && y == 0 && this->currentTopLine != 0) {
+                    string line = this->textBuffer[y + this->currentTopLine];
+                    this->textBuffer.erase(this->textBuffer.begin() + y + this->currentTopLine);
+                    this->currentTopLine--;
+                    x = static_cast<int>(this->textBuffer[y + this->currentTopLine].size());
+                    this->textBuffer[y + this->currentTopLine] += line;
                     renderDoc();
                     wmove(this->window, y, x);
                 }
@@ -173,7 +190,7 @@ namespace io {
             
             void processTab(int& x, int& y) {
                 wprintw(this->window, "Recieved tab input");
-                this->textBuffer[y].insert(x, 4, ' ');
+                this->textBuffer[y + this->currentTopLine].insert(x, 4, ' ');
                 x += 4;
                 renderDoc();
                 wmove(this->window, y, x);
@@ -181,7 +198,7 @@ namespace io {
             
             void processNormalKey(int key, int& x, int& y) {
                 char character = static_cast<char>(key);
-                this->textBuffer[y].insert(x, 1, character);
+                this->textBuffer[y+this->currentTopLine].insert(x, 1, character);
                 x++;
                 renderDoc();
                 wmove(this->window, y, x);

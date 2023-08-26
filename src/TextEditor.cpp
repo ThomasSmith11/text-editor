@@ -31,10 +31,13 @@ int main(int argc, char** argv) {
 
     while (true) {
         ch = wgetch(textwin);
-        if (ch == 27) {
+        if (ch == KEY_RESIZE) {
+            continue;
+        }
+        else if (ch == 27) {
             wmove(textwin, LINES-2, 0);
             wrefresh(textwin);
-            processor.processEscapeSequence();
+            processor.processEscapeSequence(cursorXPos, cursorYPos);
             wmove(textwin, cursorYPos, cursorXPos);
         }
         else if (ch == KEY_UP || ch == KEY_DOWN || ch == KEY_LEFT || ch == KEY_RIGHT) {

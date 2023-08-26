@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <regex>
+#include <map>
 #include <cstring>
 #include <ncurses.h>
 
@@ -63,8 +65,110 @@ namespace io {
                 wprintw(this->window, "%s", cStr);
                 wmove(this->window, LINES-2, command.length());
             }
+            
+            void processFind(int& x, int& y) {
+                wmove(this->window, LINES-2, 0);
+                wprintw(this->window, "  ");
+                wmove(this->window, LINES-3, 0);
+                wprintw(this->window, "Type value to search for, then enter: ");
+                wmove(this->window, LINES-2, 0);
+                string searchTerm;
+                int nextChar;
+                nextChar = wgetch(this->window);
+                while (nextChar != 10) {
+                    if (nextChar == KEY_BACKSPACE && !searchTerm.empty()) {
+                        searchTerm.pop_back();
+                    }
+                    else if (nextChar != KEY_BACKSPACE) {
+                        searchTerm += static_cast<char>(nextChar);
+                    }
+                    displayCommand(searchTerm);
+                    nextChar = wgetch(this->window);
+                }
+                wmove(this->window, LINES-3, 0);
+                wprintw(this->window, "Press enter to see next, or esc to exit.");
+                doSearch(searchTerm, x, y);
+                cleanupCommandInput(searchTerm);
+            }
+        
+            void cleanupCommandInput(string searchTerm) {
+                wmove(this->window, LINES-3, 0);
+                wprintw(this->window, "                                         ");
+                wmove(this->window, LINES-2, 0);
+                string whitespace(searchTerm.length()+1, ' ');
+                const char* whitespaceStr = new char[whitespace.length() + 1];
+                strcpy(const_cast<char*>(whitespaceStr), whitespace.c_str());
+                wprintw(this->window, "%s", whitespaceStr);
+            }
+        
+            void doSearch(string searchTerm, int& x, int& y) {
+                wmove(this->window, 0, 0);
+                wprintw(this->window, "I was called");
+                const regex expression(searchTerm, regex_constants::icase);
+                vector<vector<int>> matches;
+                int currentLine = 0;
 
-            void processCommand(string command) {
+                for (string line : this->textBuffer) {
+                    smatch m;
+                    while (regex_search(line, m, expression)) {
+                        int index = m.position();
+                        vector<int> match;
+                        match.push_back(currentLine);
+                        match.push_back(index);
+                        matches.push_back(match);
+                        line = m.suffix().str();
+                    }
+                    currentLine++;
+                }
+                
+                int nextChar = 10;
+                
+                while (TRUE) {
+                    for (vector match : matches) {
+                        while (nextChar != 10 && nextChar != 27) {
+                            nextChar = wgetch(this->window);
+                        }
+                        if (nextChar == 27) {
+                            break;
+                        }
+                        int line = match[0];
+                        int index = match[1];
+                        if (line < (LINES-4)/2) {
+                            this->currentTopLine = 0;
+                            y = line;
+                            x = index;
+                        }
+                        else if (line > static_cast<int>(this->textBuffer.size())-((LINES-4)/2)) {
+                            this->currentTopLine = static_cast<int>(this->textBuffer.size()) - (LINES-3);
+                            y = (LINES-3) - (static_cast<int>(this->textBuffer.size())-line);
+                            x = index;
+                        }
+                        else {
+                            this->currentTopLine = line - ((LINES-4)/2);
+                            y = (LINES-4)/2;
+                            x = index;
+                        }
+                        displayHighlightedSearch(searchTerm, x, y);
+                        nextChar = 0;
+                    }
+                    if (nextChar == 27) {
+                        break;
+                    }
+                }
+                wchgat(this->window, searchTerm.length(), A_NORMAL, 0, NULL);	
+            }
+        
+            void displayHighlightedSearch(string searchTerm, int& x, int& y) {
+                int length = searchTerm.length();
+                renderDoc();
+                wmove(this->window, LINES-3, 0);
+                wprintw(this->window, "Press enter to see next, or esc to exit.");
+                displayCommand(searchTerm);
+                wmove(this->window, y, x);
+                wchgat(this->window, length, A_STANDOUT, 0, NULL);	
+            }
+
+            void processCommand(string command, int& x, int& y) {
                 if (command == ":q"){
                     delwin(this->window);
                     endwin();
@@ -79,8 +183,16 @@ namespace io {
                 if (command == ":s"){
                     saveToFile();
                     wmove(this->window, LINES-2, 0);
-                    wprintw(this->window, "               ");
-                }              
+                    wprintw(this->window, "  ");
+                }
+                if (command == ":f"){
+                    processFind(x, y);
+                }
+                wmove(this->window, LINES-2, 0);
+                string whitespace(COLS, ' ');
+                const char* whitespaceStr = new char[whitespace.length() + 1];
+                strcpy(const_cast<char*>(whitespaceStr), whitespace.c_str());
+                wprintw(this->window, "%s", whitespaceStr);
             }
             
 
@@ -116,7 +228,7 @@ namespace io {
                     }
                 } else if (key == KEY_DOWN) {
                     y++;
-                    if (y>LINES-4 && this->currentTopLine+LINES-4 != this->textBuffer.size()-1) {
+                    if (y>LINES-4 && this->currentTopLine+LINES-4 < this->textBuffer.size()-1) {
                         this->currentTopLine++;
                         renderDoc();
                     }
@@ -204,7 +316,7 @@ namespace io {
                 wmove(this->window, y, x);
             }
             
-            void processEscapeSequence() {
+            void processEscapeSequence(int& x, int& y) {
                 string command;
                 int nextChar;
                 nextChar = wgetch(this->window);
@@ -218,7 +330,7 @@ namespace io {
                     displayCommand(command);
                     nextChar = wgetch(this->window);
                 }
-                processCommand(command);
+                processCommand(command, x, y);
             }
     };
     string processor::emptyString = "";

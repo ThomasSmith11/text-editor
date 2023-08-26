@@ -50,6 +50,23 @@ namespace io {
                 }
                 wrefresh(this->window);
             }
+
+            string collectCommandInput() {
+                string input;
+                int nextChar;
+                nextChar = wgetch(this->window);
+                while (nextChar != 10) {
+                    if (nextChar == KEY_BACKSPACE && !input.empty()) {
+                        input.pop_back();
+                    }
+                    else if (nextChar != KEY_BACKSPACE) {
+                        input += static_cast<char>(nextChar);
+                    }
+                    displayCommand(input);
+                    nextChar = wgetch(this->window);
+                }
+                return input;
+            }
             
             void displayCommand(string command) {
                 string whitespace(command.length()+1, ' ');
@@ -72,42 +89,16 @@ namespace io {
                 wmove(this->window, LINES-3, 0);
                 wprintw(this->window, "Type value to search for, then enter: ");
                 wmove(this->window, LINES-2, 0);
-                string searchTerm;
-                int nextChar;
-                nextChar = wgetch(this->window);
-                while (nextChar != 10) {
-                    if (nextChar == KEY_BACKSPACE && !searchTerm.empty()) {
-                        searchTerm.pop_back();
-                    }
-                    else if (nextChar != KEY_BACKSPACE) {
-                        searchTerm += static_cast<char>(nextChar);
-                    }
-                    displayCommand(searchTerm);
-                    nextChar = wgetch(this->window);
-                }
+                string searchTerm = collectCommandInput();
                 wmove(this->window, LINES-3, 0);
                 wprintw(this->window, "Press enter to see next, or esc to exit.");
                 doSearch(searchTerm, x, y);
-                cleanupCommandInput(searchTerm);
+                cleanupCommandInputArea();
             }
-        
-            void cleanupCommandInput(string searchTerm) {
-                wmove(this->window, LINES-3, 0);
-                wprintw(this->window, "                                         ");
-                wmove(this->window, LINES-2, 0);
-                string whitespace(searchTerm.length()+1, ' ');
-                const char* whitespaceStr = new char[whitespace.length() + 1];
-                strcpy(const_cast<char*>(whitespaceStr), whitespace.c_str());
-                wprintw(this->window, "%s", whitespaceStr);
-            }
-        
-            void doSearch(string searchTerm, int& x, int& y) {
-                wmove(this->window, 0, 0);
-                wprintw(this->window, "I was called");
-                const regex expression(searchTerm, regex_constants::icase);
-                vector<vector<int>> matches;
+            
+            vector<vector<int>> getMatches(regex expression){
                 int currentLine = 0;
-
+                vector<vector<int>> matches;
                 for (string line : this->textBuffer) {
                     smatch m;
                     while (regex_search(line, m, expression)) {
@@ -120,9 +111,14 @@ namespace io {
                     }
                     currentLine++;
                 }
+                return matches;
+            }
+        
+            void doSearch(string searchTerm, int& x, int& y) {
+                const regex expression(searchTerm, regex_constants::icase);
+                vector<vector<int>> matches = getMatches(expression);
                 
-                int nextChar = 10;
-                
+                int nextChar;
                 while (TRUE) {
                     for (vector match : matches) {
                         while (nextChar != 10 && nextChar != 27) {
@@ -188,10 +184,16 @@ namespace io {
                 if (command == ":f"){
                     processFind(x, y);
                 }
+                cleanupCommandInputArea();
+            }
+        
+            void cleanupCommandInputArea() {
                 wmove(this->window, LINES-2, 0);
                 string whitespace(COLS, ' ');
                 const char* whitespaceStr = new char[whitespace.length() + 1];
                 strcpy(const_cast<char*>(whitespaceStr), whitespace.c_str());
+                wprintw(this->window, "%s", whitespaceStr);
+                wmove(this->window, LINES-3, 0);
                 wprintw(this->window, "%s", whitespaceStr);
             }
             
@@ -317,19 +319,7 @@ namespace io {
             }
             
             void processEscapeSequence(int& x, int& y) {
-                string command;
-                int nextChar;
-                nextChar = wgetch(this->window);
-                while (nextChar != 10) {
-                    if (nextChar == KEY_BACKSPACE && !command.empty()) {
-                        command.pop_back();
-                    }
-                    else if (nextChar != KEY_BACKSPACE) {
-                        command += static_cast<char>(nextChar);
-                    }
-                    displayCommand(command);
-                    nextChar = wgetch(this->window);
-                }
+                string command = collectCommandInput();
                 processCommand(command, x, y);
             }
     };

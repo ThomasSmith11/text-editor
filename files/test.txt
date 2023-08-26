@@ -12,3 +12,30 @@ a sophisticated editor.
 Saving functionality?: check
 
 Finding func?: mostly check, occasionally finds something that shouldn't match
+
+These lines are here to evaluate files longer than the displayed area:
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+That functionality appears to be working correctly

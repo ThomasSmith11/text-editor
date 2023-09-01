@@ -1,7 +1,9 @@
 #include <iostream>
 #include <vector>
-#include <ncurses.h>
-#include "ioprocessing.h"
+#include "document.h"
+#include "inputHandler.h"
+#include "renderingHandler.h"
+#include "selectionHandler.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -9,33 +11,28 @@ int main(int argc, char** argv) {
         return 1;
     }
     const char* filename = argv[1];
-    
-    initscr();
-    cbreak();
 
-    WINDOW *textwin = newwin(LINES-1, COLS, 0, 0);
-    keypad(textwin, TRUE);
-    noecho();
-    ESCDELAY = 0;
-    int KEY_SUP = KEY_MAX + 1; define_key("\E[1;2A", KEY_SUP);
-    int KEY_SDOWN = KEY_MAX + 2; define_key("\E[1;2B", KEY_SDOWN);
-    
-    
-    
-    std::vector<std::string> fileState;
+    Document doc = Document(filename);
+    doc.openDoc();
+    RenderingHandler* renderer = RenderingHandler::getInstance();
+    renderer->setDocument(&doc);
+    renderer->renderDoc();
 
-    io::processor processor(filename, textwin, fileState);
-    processor.populateTextBufferAndInitiallyRender();
-    
     int cursorXPos = 0;
     int cursorYPos = 0;
-    wmove(textwin, cursorYPos, cursorXPos);
+    renderer->moveCursor(cursorYPos, cursorXPos);
+    InputHandler::initializeKeyDefinitions();
+    SelectionHandler::initializeSelectedIndices();
+    int key;
     
-    int ch;
-
-    while (true) {
-        ch = wgetch(textwin);
-        
+    while (TRUE) {
+        key = InputHandler::collectInput();
+        InputHandler::processKeyInput(key, cursorXPos, cursorYPos);
+        renderer->renderDoc();
+        if (InputHandler::selecting) {
+            renderer->renderSelected();
+        }
+        renderer->moveCursor(cursorXPos, cursorYPos);
     }
     return 0;
 }

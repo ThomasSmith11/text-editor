@@ -3,6 +3,7 @@
 #include "document.h"
 #include "inputHandler.h"
 #include "renderingHandler.h"
+#include "selectionHandler.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -21,6 +22,7 @@ int main(int argc, char** argv) {
     int cursorYPos = 0;
     renderer->moveCursor(cursorYPos, cursorXPos);
     InputHandler::initializeKeyDefinitions();
+    SelectionHandler::initializeSelectedIndices();
     int key;
     
     while (TRUE) {
@@ -28,7 +30,7 @@ int main(int argc, char** argv) {
         InputHandler::processKeyInput(key, cursorXPos, cursorYPos);
         renderer->renderDoc();
         if (InputHandler::selecting) {
-//            renderer->renderSelected();
+            renderer->renderSelected();
         }
         renderer->moveCursor(cursorXPos, cursorYPos);
     }

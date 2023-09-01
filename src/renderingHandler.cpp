@@ -1,4 +1,5 @@
 #include "renderingHandler.h"
+#include "selectionHandler.h"
 #include <ncurses.h>
 #include <vector>
 #include <cstring>
@@ -63,9 +64,24 @@ void RenderingHandler::renderDoc(int linesToRemove) {
     wrefresh(this->window);
 }
 
-void RenderingHandler::renderSelected(std::vector<std::vector<int>> selectedIndices) {
-    //needs to be implemented
-    int u = 0;
+void RenderingHandler::renderSelected() {
+    std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
+    std::vector<std::string> buffer = getDocument()->getBuffer();
+    if (selectedIndices[0][0] == -1) {return;}
+    wmove(this->window, selectedIndices[0][0], selectedIndices[0][1]);
+    if (selectedIndices[0][0] == selectedIndices[1][0]) {
+        wchgat(this->window, selectedIndices[1][1]-selectedIndices[0][1], A_STANDOUT, 0, NULL);
+    }
+    else {
+        int currentx = selectedIndices[0][1];
+        for (int i = selectedIndices[0][0]; i < selectedIndices[1][0]; i++) {
+            int length = buffer[i].length() - currentx;
+            wchgat(this->window, length, A_STANDOUT, 0, NULL);
+            wmove(this->window, i+1, 0);
+            currentx = 0;
+        }
+        wchgat(this->window, selectedIndices[1][1], A_STANDOUT, 0, NULL);
+    }
 }
 
 void RenderingHandler::renderCommand(const char* command, const char* directions) {

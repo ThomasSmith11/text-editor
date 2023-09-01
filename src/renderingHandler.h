@@ -20,7 +20,7 @@ public:
     WINDOW* getWindow();
     void moveCursor(int cursorXpos, int cursorYpos);
     void renderDoc(int linesToRemove = 0);
-    void renderSelected(std::vector<std::vector<int>> selectedIndices);
+    void renderSelected();
     void closeAndDeleteWindow();
     void renderCommand(const char* command, const char* directions = "");
 };

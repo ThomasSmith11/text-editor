@@ -24,23 +24,23 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
     }
     else if (key == KEY_UP || key == KEY_DOWN || key == KEY_LEFT || key == KEY_RIGHT) {
         selecting = FALSE;
-        InputHandler::processArrowKey(key, cursorXPos, cursorYPos);
+        processArrowKey(key, cursorXPos, cursorYPos);
     }
     else if (key == 10) {
         selecting = FALSE;
-        InputHandler::processReturn(cursorXPos, cursorYPos);
+        processReturn(cursorXPos, cursorYPos);
     }
     else if (key == KEY_BACKSPACE) {
         selecting = FALSE;
-        InputHandler::processDelete(cursorXPos, cursorYPos);
+        processDelete(cursorXPos, cursorYPos);
     }
     else if (key == 9) {
         selecting = FALSE;
-        InputHandler::processTab(cursorXPos, cursorYPos);
+        processTab(cursorXPos, cursorYPos);
     }
     else if (key == KEY_SUP || key == KEY_SDOWN || key == KEY_SLEFT || key == KEY_SRIGHT) {
         selecting = TRUE;
-        InputHandler::processArrowKey(key, cursorXPos, cursorYPos);
+        processShiftedArrowKey(key, cursorXPos, cursorYPos);
     }
     else {
         selecting = FALSE;
@@ -167,6 +167,16 @@ void InputHandler::processArrowKey(int key, int& cursorXPos, int& cursorYPos) {
     }
     cursorYPos = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(cursorYPos, LINES-1)));
     cursorXPos = std::max(0, std::min(cursorXPos, static_cast<int>(buffer[cursorYPos+currentTopLine].size())));
+}
+
+void InputHandler::processShiftedArrowKey(int key, int& cursorXPos, int& cursorYPos) {
+    std::string direction;
+    if (key == KEY_SUP) {direction = "up";}
+    else if (key == KEY_SDOWN) {direction = "down";}
+    else if (key == KEY_SRIGHT) {direction = "right";}
+    else if (key == KEY_SLEFT) {direction = "left";}
+    SelectionHandler::updateSelectedIndices(cursorXPos, cursorYPos, direction);
+    processArrowKey(key, cursorXPos, cursorYPos);
 }
 
 int InputHandler::collectInput() {

@@ -19,7 +19,7 @@ std::string CommandHandler::collectCommand(const char* directions) {
     renderer->renderCommand(cStr, directions);
     int nextChar;
     nextChar = InputHandler::collectInput();
-    while (nextChar != 10) {
+    while (nextChar != InputHandler::KEY_RETURN) {
         if (nextChar == KEY_BACKSPACE && !input.empty()) {
             input.pop_back();
         }
@@ -91,13 +91,13 @@ void CommandHandler::doSearch(RenderingHandler* renderer, std::string searchTerm
         currentLine++;
     }
 
-    int nextChar = 10;
+    int nextChar = InputHandler::KEY_RETURN;
     while (TRUE) {
         for (std::vector match : matches) {
-            while (nextChar != 10 && nextChar != 27) {
+            while (nextChar != InputHandler::KEY_RETURN && nextChar != InputHandler::KEY_ESC) {
                 nextChar = InputHandler::collectInput();
             }
-            if (nextChar == 27) {
+            if (nextChar == InputHandler::KEY_ESC) {
                 break;
             }
             int line = match[0];
@@ -105,7 +105,7 @@ void CommandHandler::doSearch(RenderingHandler* renderer, std::string searchTerm
             renderer->displayHighlightedSearchTerm(searchTerm, cursorXPos, cursorYPos, line, index);
             nextChar = 0;
         }
-        if (nextChar == 27) {
+        if (nextChar == InputHandler::KEY_ESC) {
                 break;
         }
     }

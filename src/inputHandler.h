@@ -7,6 +7,11 @@
 class InputHandler {
 public:
     static bool selecting;
+    static const int KEY_SUP;
+    static const int KEY_SDOWN;
+    static const int KEY_RETURN;
+    static const int KEY_ESC;
+    static const int KEY_TAB;
     static void processKeyInput(int key, int& cursorXPos, int& cursorYPos);
     static int collectInput();
     static void initializeKeyDefinitions();

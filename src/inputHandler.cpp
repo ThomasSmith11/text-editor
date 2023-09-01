@@ -7,19 +7,20 @@
 #include "commandHandler.h"
 
 bool InputHandler::selecting = FALSE;
-int KEY_SUP = KEY_MAX + 1;
-int KEY_SDOWN = KEY_MAX + 2;
+const int InputHandler::KEY_SUP = KEY_MAX + 1;
+const int InputHandler::KEY_SDOWN = KEY_MAX + 2;
+const int InputHandler::KEY_RETURN = 10;;
+const int InputHandler::KEY_ESC = 27;
+const int InputHandler::KEY_TAB = 9;
 
 void InputHandler::initializeKeyDefinitions() {
-    int KEY_SUP = KEY_MAX + 1;
-    int KEY_SDOWN = KEY_MAX + 2;
     define_key("\E[1;2A", KEY_SUP);
     define_key("\E[1;2B", KEY_SDOWN);
 }
 
 void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
     if (key == KEY_RESIZE) {}
-    else if (key == 27) {
+    else if (key == KEY_ESC) {
         CommandHandler::processCommandInput(cursorXPos, cursorYPos);
     }
     else if (key == KEY_UP || key == KEY_DOWN || key == KEY_LEFT || key == KEY_RIGHT) {
@@ -29,7 +30,7 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
             SelectionHandler::initializeSelectedIndices();
         }
     }
-    else if (key == 10) {
+    else if (key == KEY_RETURN) {
         processReturn(cursorXPos, cursorYPos);
         if (selecting) {
             selecting = FALSE;

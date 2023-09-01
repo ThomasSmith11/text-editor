@@ -17,6 +17,10 @@ int main(int argc, char** argv) {
     keypad(textwin, TRUE);
     noecho();
     ESCDELAY = 0;
+    int KEY_SUP = KEY_MAX + 1; define_key("\E[1;2A", KEY_SUP);
+    int KEY_SDOWN = KEY_MAX + 2; define_key("\E[1;2B", KEY_SDOWN);
+    
+    
     
     std::vector<std::string> fileState;
 
@@ -31,30 +35,7 @@ int main(int argc, char** argv) {
 
     while (true) {
         ch = wgetch(textwin);
-        if (ch == KEY_RESIZE) {
-            continue;
-        }
-        else if (ch == 27) {
-            wmove(textwin, LINES-2, 0);
-            wrefresh(textwin);
-            processor.processEscapeSequence(cursorXPos, cursorYPos);
-            wmove(textwin, cursorYPos, cursorXPos);
-        }
-        else if (ch == KEY_UP || ch == KEY_DOWN || ch == KEY_LEFT || ch == KEY_RIGHT) {
-            processor.processArrowKey(ch, cursorXPos, cursorYPos);
-        }
-        else if (ch == 10) {
-            processor.processReturn(cursorXPos, cursorYPos);
-        }
-        else if (ch == KEY_BACKSPACE) {
-            processor.processDelete(cursorXPos, cursorYPos);
-        }
-        else if (ch == 9) {
-            processor.processTab(cursorXPos, cursorYPos);
-        }
-        else {
-            processor.processNormalKey(ch, cursorXPos, cursorYPos);
-        }
+        
     }
     return 0;
 }

@@ -12,7 +12,7 @@ private:
     static void calcLeftIndices(int cursorXpos, int cursorYpos);
 
 public:
-    static const std::vector<std::vector<int>>& getSelectedIndices();
+    static std::vector<std::vector<int>> getSelectedIndices();
     static void updateSelectedIndices(int cursorXpos, int cursorYpos, std::string direction);
     static void initializeSelectedIndices();
 };

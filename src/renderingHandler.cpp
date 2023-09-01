@@ -64,10 +64,24 @@ void RenderingHandler::renderDoc(int linesToRemove) {
     wrefresh(this->window);
 }
 
-void RenderingHandler::renderSelected() {
+void RenderingHandler::renderSelected(int linesToRemove) {
     std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
     std::vector<std::string> buffer = getDocument()->getBuffer();
+
+    mvwprintw(this->window, LINES - 1, 0, "selectedIndices: [%d, %d] - [%d, %d]",
+    selectedIndices[0][0], selectedIndices[0][1], selectedIndices[1][0], selectedIndices[1][1]);
+
     if (selectedIndices[0][0] == -1) {return;}
+    if (selectedIndices[0][0] < this->currentTopLine) {
+        selectedIndices[0][0] = this->currentTopLine;
+        selectedIndices[0][1] = 0;
+    }
+    if (selectedIndices[1][0] >= this->currentTopLine + LINES-linesToRemove) {
+        selectedIndices[1][0] = this->currentTopLine + LINES-linesToRemove;
+        selectedIndices[1][1] = buffer[this->currentTopLine + LINES-linesToRemove].length();
+    }
+    selectedIndices[0][0] -= this->currentTopLine;
+    selectedIndices[1][0] -= this->currentTopLine;
     wmove(this->window, selectedIndices[0][0], selectedIndices[0][1]);
     if (selectedIndices[0][0] == selectedIndices[1][0]) {
         wchgat(this->window, selectedIndices[1][1]-selectedIndices[0][1], A_STANDOUT, 0, NULL);
@@ -75,7 +89,7 @@ void RenderingHandler::renderSelected() {
     else {
         int currentx = selectedIndices[0][1];
         for (int i = selectedIndices[0][0]; i < selectedIndices[1][0]; i++) {
-            int length = buffer[i].length() - currentx;
+            int length = buffer[i+this->currentTopLine].length() - currentx;
             wchgat(this->window, length, A_STANDOUT, 0, NULL);
             wmove(this->window, i+1, 0);
             currentx = 0;
@@ -86,6 +100,7 @@ void RenderingHandler::renderSelected() {
 
 void RenderingHandler::renderCommand(const char* command, const char* directions) {
     this->renderDoc(4);
+    this->renderSelected(4);
     wmove(this->window, LINES-2, 0);
     wprintw(this->window, "%s", directions);
     wmove(this->window, LINES-1, 0);

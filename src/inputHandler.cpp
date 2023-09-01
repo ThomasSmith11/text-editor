@@ -23,28 +23,43 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
         CommandHandler::processCommandInput(cursorXPos, cursorYPos);
     }
     else if (key == KEY_UP || key == KEY_DOWN || key == KEY_LEFT || key == KEY_RIGHT) {
-        selecting = FALSE;
         processArrowKey(key, cursorXPos, cursorYPos);
+        if (selecting) {
+            selecting = FALSE;
+            SelectionHandler::initializeSelectedIndices();
+        }
     }
     else if (key == 10) {
-        selecting = FALSE;
         processReturn(cursorXPos, cursorYPos);
+        if (selecting) {
+            selecting = FALSE;
+            SelectionHandler::initializeSelectedIndices();
+        }
     }
     else if (key == KEY_BACKSPACE) {
-        selecting = FALSE;
         processDelete(cursorXPos, cursorYPos);
+        if (selecting) {
+            selecting = FALSE;
+            SelectionHandler::initializeSelectedIndices();
+        }
     }
     else if (key == 9) {
-        selecting = FALSE;
         processTab(cursorXPos, cursorYPos);
+        if (selecting) {
+            selecting = FALSE;
+            SelectionHandler::initializeSelectedIndices();
+        }
     }
     else if (key == KEY_SUP || key == KEY_SDOWN || key == KEY_SLEFT || key == KEY_SRIGHT) {
         selecting = TRUE;
         processShiftedArrowKey(key, cursorXPos, cursorYPos);
     }
     else {
-        selecting = FALSE;
         InputHandler::processNormalKey(key, cursorXPos, cursorYPos);
+        if (selecting) {
+            selecting = FALSE;
+            SelectionHandler::initializeSelectedIndices();
+        }
     }
 }
 

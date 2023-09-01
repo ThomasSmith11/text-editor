@@ -105,6 +105,33 @@ void RenderingHandler::renderCommand(const char* command, const char* directions
     wmove(this->window, LINES-1, static_cast<int>(strlen(command)));
 }
 
+void RenderingHandler::displayHighlightedSearchTerm(std::string searchTerm, int& cursorXPos, int& cursorYPos, int line, int index) {
+    const char* description = "Press enter to see next, or esc to exit.";
+    const char* searchTermcStr = searchTerm.c_str();
+    std::vector<std::string> buffer = getDocument()->getBuffer();
+    if (line < (LINES-4)/2) {
+        this->currentTopLine = 0;
+        cursorYPos = line;
+        cursorXPos = index;
+    }
+    else if (line > static_cast<int>(buffer.size())-((LINES-4)/2)) {
+        this->currentTopLine = static_cast<int>(buffer.size()) - (LINES-3);
+        cursorYPos = (LINES-3) - (static_cast<int>(buffer.size())-line);
+        cursorXPos = index;
+    }
+    else {
+        this->currentTopLine = line - ((LINES-4)/2);
+        cursorYPos = (LINES-4)/2;
+        cursorXPos = index;
+    }
+    renderCommand(searchTermcStr, description);
+    int length = searchTerm.length();
+    wmove(this->window, cursorYPos, cursorXPos);
+    wchgat(this->window, length, A_STANDOUT, 0, NULL);	
+    cursorXPos += length;
+    wmove(this->window, cursorYPos, cursorXPos);
+}
+
 void RenderingHandler::closeAndDeleteWindow() {
     delwin(this->window);
     endwin();

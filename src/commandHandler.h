@@ -5,9 +5,11 @@
 
 class CommandHandler {
 public:
-    static void processCommandInput(int cursorXPos, int cursorYPos);
+    static void processCommandInput(int& cursorXPos, int& cursorYPos);
 
 private:
-    static std::string collectCommand(RenderingHandler* renderer);
-    static void executeCommand(std::string command, RenderingHandler* renderer);
+    static std::string collectCommand(RenderingHandler* renderer, const char* directions = "");
+    static void executeCommand(std::string command, RenderingHandler* renderer, int& cursorXPos, int& cursorYPos);
+    static void orchestrateFind(RenderingHandler* renderer, int& cursorXPos, int& cursorYPos);
+    static void doSearch(RenderingHandler* renderer, std::string searchTerm, int& cursorXPos, int& cursorYPos);
 };

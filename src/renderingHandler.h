@@ -23,4 +23,5 @@ public:
     void renderSelected(int linesToRemove = 0);
     void closeAndDeleteWindow();
     void renderCommand(const char* command, const char* directions = "");
+    void displayHighlightedSearchTerm(std::string searchTerm, int& cursorXPos, int& cursorYPos, int line, int index);
 };

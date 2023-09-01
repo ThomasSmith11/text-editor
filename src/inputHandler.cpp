@@ -7,7 +7,6 @@
 #include "commandHandler.h"
 
 bool InputHandler::selecting = FALSE;
-RenderingHandler* renderer = RenderingHandler::getInstance();
 int KEY_SUP = KEY_MAX + 1;
 int KEY_SDOWN = KEY_MAX + 2;
 
@@ -65,6 +64,7 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
 }
 
 void InputHandler::processNormalKey(int key, int& cursorXPos, int& cursorYPos) {
+    RenderingHandler* renderer = RenderingHandler::getInstance();
     int& currentTopLine = renderer->getCurrentTopLine();
     std::vector<std::string>& buffer = renderer->getDocument()->getBuffer();
     char character = static_cast<char>(key);
@@ -88,6 +88,7 @@ void InputHandler::processNormalKey(int key, int& cursorXPos, int& cursorYPos) {
 }
 
 void InputHandler::processTab(int& cursorXPos, int& cursorYPos) {
+    RenderingHandler* renderer = RenderingHandler::getInstance();
     int& currentTopLine = renderer->getCurrentTopLine();
     std::vector<std::string>& buffer = renderer->getDocument()->getBuffer();
     if (!selecting) {
@@ -110,6 +111,7 @@ void InputHandler::processTab(int& cursorXPos, int& cursorYPos) {
 }
 
 void InputHandler::processReturn(int& cursorXPos, int& cursorYPos) {
+    RenderingHandler* renderer = RenderingHandler::getInstance();
     int& currentTopLine = renderer->getCurrentTopLine();
     std::vector<std::string>& buffer = renderer->getDocument()->getBuffer();
     if (!selecting) {
@@ -153,6 +155,7 @@ void InputHandler::processReturn(int& cursorXPos, int& cursorYPos) {
 }
 
 void InputHandler::processDelete(int& cursorXPos, int& cursorYPos) {
+    RenderingHandler* renderer = RenderingHandler::getInstance();
     int& currentTopLine = renderer->getCurrentTopLine();
     std::vector<std::string>& buffer = renderer->getDocument()->getBuffer();
     if (!selecting) {
@@ -191,6 +194,7 @@ void InputHandler::processDelete(int& cursorXPos, int& cursorYPos) {
 }
 
 void InputHandler::processArrowKey(int key, int& cursorXPos, int& cursorYPos) {
+    RenderingHandler* renderer = RenderingHandler::getInstance();
     int& currentTopLine = renderer->getCurrentTopLine();
     std::vector<std::string>& buffer = renderer->getDocument()->getBuffer();
     if (key == KEY_UP || key == KEY_SUP) {
@@ -237,6 +241,7 @@ void InputHandler::processShiftedArrowKey(int key, int& cursorXPos, int& cursorY
 }
 
 int InputHandler::collectInput() {
+    RenderingHandler* renderer = RenderingHandler::getInstance();
     int input = wgetch(renderer->getWindow());
     return input;
 }

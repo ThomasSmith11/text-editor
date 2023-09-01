@@ -1,17 +1,19 @@
 #include "commandHandler.h"
 #include "renderingHandler.h"
 #include "inputHandler.h"
+#include "selectionHandler.h"
+#include "clipboard.h"
 #include <vector>
 #include <string>
 #include <regex>
 
 void CommandHandler::processCommandInput(int& cursorXPos, int& cursorYPos) {
-    RenderingHandler* renderer = RenderingHandler::getInstance();
-    std::string command = collectCommand(renderer);
-    executeCommand(command, renderer, cursorXPos, cursorYPos);
+    std::string command = collectCommand();
+    executeCommand(command, cursorXPos, cursorYPos);
 }
 
-std::string CommandHandler::collectCommand(RenderingHandler* renderer, const char* directions) {
+std::string CommandHandler::collectCommand(const char* directions) {
+    RenderingHandler* renderer = RenderingHandler::getInstance();
     std::string input;
     const char* cStr = "";
     renderer->renderCommand(cStr, directions);
@@ -31,19 +33,20 @@ std::string CommandHandler::collectCommand(RenderingHandler* renderer, const cha
     return input;
 }
 
-void CommandHandler::executeCommand(std::string command, RenderingHandler* renderer, int& cursorXPos, int& cursorYPos) {
+void CommandHandler::executeCommand(std::string command, int& cursorXPos, int& cursorYPos) {
+    RenderingHandler* renderer = RenderingHandler::getInstance();
     if (command == ":q"){
         renderer->closeAndDeleteWindow();
         exit(0);
     }
     if (command == ":c") {
-
+        Clipboard::copy();
     }
     if (command == ":x") {
-
+        Clipboard::cut(cursorXPos, cursorYPos);
     }
     if (command == ":v") {
-
+        Clipboard::paste(cursorXPos, cursorYPos);
     }
     if (command == ":qs" || command == ":sq"){
         renderer->getDocument()->saveDoc();
@@ -54,6 +57,8 @@ void CommandHandler::executeCommand(std::string command, RenderingHandler* rende
         renderer->getDocument()->saveDoc();
     }
     if (command == ":f"){
+        InputHandler::selecting=FALSE;
+        SelectionHandler::initializeSelectedIndices();
         orchestrateFind(renderer, cursorXPos, cursorYPos);
     }
     renderer->renderDoc();
@@ -63,7 +68,7 @@ void CommandHandler::orchestrateFind(RenderingHandler* renderer, int& cursorXPos
     const char* command = "";
     const char* description = "Type value to search for, then enter: ";
     renderer->renderCommand(command, description);
-    std::string searchTerm = collectCommand(renderer, description);
+    std::string searchTerm = collectCommand(description);
     doSearch(renderer, searchTerm, cursorXPos, cursorYPos);
 }
 

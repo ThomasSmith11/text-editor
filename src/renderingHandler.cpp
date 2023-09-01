@@ -50,7 +50,7 @@ void RenderingHandler::renderDoc(int linesToRemove) {
     wclear(this->window);
     int linesToPrint = LINES-linesToRemove;
     int i = 0;
-    while (i <= linesToPrint) {
+    while (i < linesToPrint) {
         if (i >= static_cast<int>(this->document->getBuffer().size())) {
             break;
         }
@@ -96,8 +96,8 @@ void RenderingHandler::renderSelected(int linesToRemove) {
 }
 
 void RenderingHandler::renderCommand(const char* command, const char* directions) {
-    this->renderDoc(4);
-    this->renderSelected(4);
+    this->renderDoc(3);
+    this->renderSelected(3);
     wmove(this->window, LINES-2, 0);
     wprintw(this->window, "%s", directions);
     wmove(this->window, LINES-1, 0);

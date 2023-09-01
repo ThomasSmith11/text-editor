@@ -34,6 +34,5 @@ int main(int argc, char** argv) {
         }
         renderer->moveCursor(cursorXPos, cursorYPos);
     }
-    endwin();
     return 0;
 }

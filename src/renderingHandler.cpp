@@ -68,9 +68,6 @@ void RenderingHandler::renderSelected(int linesToRemove) {
     std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
     std::vector<std::string> buffer = getDocument()->getBuffer();
 
-    mvwprintw(this->window, LINES - 1, 0, "selectedIndices: [%d, %d] - [%d, %d]",
-    selectedIndices[0][0], selectedIndices[0][1], selectedIndices[1][0], selectedIndices[1][1]);
-
     if (selectedIndices[0][0] == -1) {return;}
     if (selectedIndices[0][0] < this->currentTopLine) {
         selectedIndices[0][0] = this->currentTopLine;

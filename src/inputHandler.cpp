@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 #include <ncurses.h>
 #include "inputHandler.h"
 #include "renderingHandler.h"
@@ -72,7 +73,17 @@ void InputHandler::processNormalKey(int key, int& cursorXPos, int& cursorYPos) {
         cursorXPos++;
     }
     else {
-        //not yet implemented
+        std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
+        int firstLine = selectedIndices[0][0];
+        int lastLine = selectedIndices[1][0];
+        std::string substrOne = buffer[firstLine].substr(0,selectedIndices[0][1]);
+        std::string substrTwo = buffer[lastLine].substr(selectedIndices[1][1], static_cast<int>(buffer[lastLine].size()));
+        for (int i = firstLine; i <= lastLine; i++) {
+            buffer.erase(buffer.begin() + firstLine);
+        }
+        buffer.insert(buffer.begin() + firstLine, substrOne+character+substrTwo);
+        cursorYPos = firstLine;
+        cursorXPos = selectedIndices[0][1] + 1;
     }
 }
 
@@ -84,7 +95,17 @@ void InputHandler::processTab(int& cursorXPos, int& cursorYPos) {
         cursorXPos += 4;
     }
     else {
-        //not yet implemented
+        std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
+        int firstLine = selectedIndices[0][0];
+        int lastLine = selectedIndices[1][0];
+        std::string substrOne = buffer[firstLine].substr(0,selectedIndices[0][1]);
+        std::string substrTwo = buffer[lastLine].substr(selectedIndices[1][1], static_cast<int>(buffer[lastLine].size()));
+        for (int i = firstLine; i <= lastLine; i++) {
+            buffer.erase(buffer.begin() + firstLine);
+        }
+        buffer.insert(buffer.begin() + firstLine, substrOne+"    "+substrTwo);
+        cursorYPos = firstLine;
+        cursorXPos = selectedIndices[0][1] + 4;
     }
 }
 
@@ -116,7 +137,18 @@ void InputHandler::processReturn(int& cursorXPos, int& cursorYPos) {
         }
     }
     else {
-        //not yet implemented
+        std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
+        int firstLine = selectedIndices[0][0];
+        int lastLine = selectedIndices[1][0];
+        std::string substrOne = buffer[firstLine].substr(0,selectedIndices[0][1]);
+        std::string substrTwo = buffer[lastLine].substr(selectedIndices[1][1], static_cast<int>(buffer[lastLine].size()));
+        for (int i = firstLine; i <= lastLine; i++) {
+            buffer.erase(buffer.begin() + firstLine);
+        }
+        buffer.insert(buffer.begin() + firstLine, substrOne);
+        buffer.insert(buffer.begin() + firstLine+1, substrTwo);
+        cursorYPos = firstLine + 1 - renderer->getCurrentTopLine();
+        cursorXPos = 0;
     }
 }
 
@@ -144,7 +176,17 @@ void InputHandler::processDelete(int& cursorXPos, int& cursorYPos) {
         }
     }
     else {
-        //not yet implemented
+        std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
+        int firstLine = selectedIndices[0][0];
+        int lastLine = selectedIndices[1][0];
+        std::string substrOne = buffer[firstLine].substr(0,selectedIndices[0][1]);
+        std::string substrTwo = buffer[lastLine].substr(selectedIndices[1][1], static_cast<int>(buffer[lastLine].size()));
+        for (int i = firstLine; i <= lastLine; i++) {
+            buffer.erase(buffer.begin() + firstLine);
+        }
+        buffer.insert(buffer.begin() + firstLine, substrOne+substrTwo);
+        cursorYPos = firstLine-renderer->getCurrentTopLine();
+        cursorXPos = selectedIndices[0][1];
     }
 }
 

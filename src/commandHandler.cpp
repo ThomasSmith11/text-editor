@@ -1,6 +1,7 @@
 #include "commandHandler.h"
 #include "renderingHandler.h"
 #include "inputHandler.h"
+#include <vector>
 #include <string>
 
 void CommandHandler::processCommandInput(int cursorXPos, int cursorYPos) {
@@ -52,7 +53,7 @@ void CommandHandler::executeCommand(std::string command, RenderingHandler* rende
         renderer->getDocument()->saveDoc();
     }
     if (command == ":f"){
-
+        std::vector<std::string> buffer = renderer->getDocument()->getBuffer();
     }
     renderer->renderDoc();
 }

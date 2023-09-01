@@ -28,7 +28,7 @@ void Clipboard::paste(int& cursorXPos, int&cursorYPos) {
     int& topLine = renderer->getCurrentTopLine();
     std::string substrOne = buffer[cursorYPos + topLine].substr(0, cursorXPos);
     std::string substrTwo = buffer[cursorYPos + topLine].substr(cursorXPos, buffer[cursorYPos + topLine].length());
-    if (static_cast<int>(clipboard.size()) == 1) {
+    if (clipboard.size() == 1) {
         buffer[cursorYPos + topLine] = substrOne+clipboard[0]+substrTwo;
         cursorXPos += clipboard[0].length();
     }
@@ -36,7 +36,7 @@ void Clipboard::paste(int& cursorXPos, int&cursorYPos) {
         std::string firstLine = substrOne+clipboard[0];
         std::string lastLine = clipboard[static_cast<int>(clipboard.size())-1]+substrTwo;
         buffer[cursorYPos + topLine] = firstLine;
-        for (int i=1; i<static_cast<int>(clipboard.size())-1; i++) {
+        for (int i=1; i<clipboard.size()-1; i++) {
             buffer.insert(buffer.begin() + cursorYPos + topLine+1, clipboard[i]);
             cursorYPos++;
             if (cursorYPos > LINES-1) {

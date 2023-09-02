@@ -22,6 +22,11 @@ RenderingHandler* RenderingHandler::getInstance() {
     return instance;
 }
 
+RenderingHandler::~RenderingHandler() {
+    delwin(this->window);
+    endwin();
+}
+
 void RenderingHandler::setDocument(Document* doc) {
     this->document = doc;
 }
@@ -130,9 +135,4 @@ void RenderingHandler::displayHighlightedSearchTerm(std::string searchTerm, int&
     wchgat(this->window, length, A_STANDOUT, 0, NULL);	
     cursorXPos += length;
     wmove(this->window, cursorYPos, cursorXPos);
-}
-
-void RenderingHandler::closeAndDeleteWindow() {
-    delwin(this->window);
-    endwin();
 }

@@ -36,7 +36,7 @@ std::string CommandHandler::collectCommand(const char* directions) {
 void CommandHandler::executeCommand(std::string command, int& cursorXPos, int& cursorYPos) {
     RenderingHandler* renderer = RenderingHandler::getInstance();
     if (command == ":q"){
-        renderer->closeAndDeleteWindow();
+        delete renderer;
         exit(0);
     }
     if (command == ":c") {
@@ -50,7 +50,7 @@ void CommandHandler::executeCommand(std::string command, int& cursorXPos, int& c
     }
     if (command == ":qs" || command == ":sq"){
         renderer->getDocument()->saveDoc();
-        renderer->closeAndDeleteWindow();
+        delete renderer;
         exit(0);
     }
     if (command == ":s"){

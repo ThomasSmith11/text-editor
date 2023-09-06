@@ -44,7 +44,7 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
             SelectionHandler::initializeSelectedIndices();
         }
     }
-    else if (key == 9) {
+    else if (key == KEY_TAB) {
         processTab(cursorXPos, cursorYPos);
         if (selecting) {
             selecting = FALSE;

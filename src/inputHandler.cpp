@@ -91,7 +91,7 @@ void InputHandler::processNormalKey(int key, int& cursorXPos, int& cursorYPos) {
         cursorXPos++;
     }
     else {
-        std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
+        std::vector<std::vector<int> > selectedIndices = SelectionHandler::getSelectedIndices();
         int firstLine = selectedIndices[0][0];
         int lastLine = selectedIndices[1][0];
         std::string substrOne = buffer[firstLine].substr(0,selectedIndices[0][1]);
@@ -114,7 +114,7 @@ void InputHandler::processTab(int& cursorXPos, int& cursorYPos) {
         cursorXPos += 4;
     }
     else {
-        std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
+        std::vector<std::vector<int> > selectedIndices = SelectionHandler::getSelectedIndices();
         int firstLine = selectedIndices[0][0];
         int lastLine = selectedIndices[1][0];
         std::string substrOne = buffer[firstLine].substr(0,selectedIndices[0][1]);
@@ -146,7 +146,7 @@ void InputHandler::processReturn(int& cursorXPos, int& cursorYPos) {
         }
     }
     else {
-        std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
+        std::vector<std::vector<int> > selectedIndices = SelectionHandler::getSelectedIndices();
         int firstLine = selectedIndices[0][0];
         int lastLine = selectedIndices[1][0];
         std::string substrOne = buffer[firstLine].substr(0,selectedIndices[0][1]);
@@ -195,7 +195,7 @@ void InputHandler::processDelete(int& cursorXPos, int& cursorYPos) {
         }
     }
     else {
-        std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
+        std::vector<std::vector<int> > selectedIndices = SelectionHandler::getSelectedIndices();
         int firstLine = selectedIndices[0][0];
         int lastLine = selectedIndices[1][0];
         std::string substrOne = buffer[firstLine].substr(0,selectedIndices[0][1]);

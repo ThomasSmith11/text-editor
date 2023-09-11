@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-std::vector<std::vector<int>> SelectionHandler::selectedIndices;
+std::vector<std::vector<int> > SelectionHandler::selectedIndices;
 
 void SelectionHandler::calcUpIndices(int x, int y) {
     RenderingHandler* renderer = RenderingHandler::getInstance();
@@ -240,7 +240,7 @@ void SelectionHandler::calcLeftIndices(int x, int y) {
     }
 }
 
-std::vector<std::vector<int>> SelectionHandler::getSelectedIndices() {
+std::vector<std::vector<int> > SelectionHandler::getSelectedIndices() {
     return selectedIndices;
 }
 

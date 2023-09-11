@@ -56,7 +56,7 @@ void Clipboard::paste(int& cursorXPos, int&cursorYPos) {
 
 void Clipboard::doCopy() {
     clipboard.clear();
-    std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
+    std::vector<std::vector<int> > selectedIndices = SelectionHandler::getSelectedIndices();
     RenderingHandler* renderer = RenderingHandler::getInstance();
     std::vector<std::string> buffer = renderer->getDocument()->getBuffer();
     if (!InputHandler::selecting) {

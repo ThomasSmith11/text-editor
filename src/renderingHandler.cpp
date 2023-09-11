@@ -76,7 +76,7 @@ void RenderingHandler::renderDoc(int linesToRemove) {
 }
 
 void RenderingHandler::renderSelected(int linesToRemove) {
-    std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
+    std::vector<std::vector<int> > selectedIndices = SelectionHandler::getSelectedIndices();
     std::vector<std::string> buffer = getDocument()->getBuffer();
 
     if (selectedIndices[0][0] == -1) {return;}

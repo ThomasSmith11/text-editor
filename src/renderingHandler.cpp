@@ -23,6 +23,8 @@ RenderingHandler* RenderingHandler::getInstance() {
 }
 
 RenderingHandler::~RenderingHandler() {
+    nocbreak();
+    echo();
     delwin(this->window);
     endwin();
 }

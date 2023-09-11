@@ -62,7 +62,7 @@ void RenderingHandler::renderDoc(int linesToRemove) {
             break;
         }
         std::string line = buffer[this->currentTopLine + i];
-        if (line.empty() || line.back() != '\n') {
+        if (line.back() != '\n') {
             line += "\n";
         }
         const char* cStr = line.c_str();

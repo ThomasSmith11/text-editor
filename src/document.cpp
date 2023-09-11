@@ -17,13 +17,18 @@ void Document::openDoc() {
     if (inputFile.is_open()) {
         std::string line;
         while (getline(inputFile, line)) {
-            line += "\n";
-            this->textBuffer.push_back(line);
+            if (line.empty()) {
+                this->textBuffer.push_back("\n");
+            }
+            else {
+                line += "\n";
+                this->textBuffer.push_back(line);
+            }
         }
         inputFile.close();
     }
     if (this->textBuffer.size() == 0) {
-        this->textBuffer.push_back("");
+        this->textBuffer.push_back("\n");
     }
 }
 
@@ -50,8 +55,23 @@ int Document::getLineLength(int lineNum) {
 
 std::vector<std::string> Document::splitString(std::string stringToSplit, int size) {
     std::vector<std::string> returnVec;
-    for (int i = 0; i < stringToSplit.length(); i += size) {
-        returnVec.push_back(stringToSplit.substr(i, size));
+    while (!stringToSplit.empty()) {
+        if (stringToSplit.length() <= size) {
+            returnVec.push_back(stringToSplit);
+            stringToSplit.clear();
+            break;
+        }
+        std::string substring = stringToSplit.substr(0, size);
+        size_t lastIndex = substring.find_last_of(' ');
+            if (lastIndex == std::string::npos) {
+                lastIndex = size;
+            }
+            else {
+                lastIndex+=1;
+            }
+        std::string realSubstring = stringToSplit.substr(0, lastIndex);
+        returnVec.push_back(realSubstring);
+        stringToSplit.erase(0, lastIndex);
     }
     return returnVec;
 }

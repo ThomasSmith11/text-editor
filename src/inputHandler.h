@@ -22,5 +22,5 @@ private:
     static void processDelete(int& cursorXPos, int& cursorYPos);
     static void processArrowKey(int key, int& cursorXPos, int& cursorYPos);
     static void processShiftedArrowKey(int key, int& cursorXPos, int& cursorYPos);
-    static void handleTextWrap(int& cursorXPos, int& cursorYPos);
+    static void handleTextWrap(int& cursorXPos, int& cursorYPos, bool resizing);
 };

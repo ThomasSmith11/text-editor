@@ -11,6 +11,7 @@ private:
     WINDOW *window;
     static RenderingHandler* instance;
     RenderingHandler();
+    void initiallyResize();
 public:
     ~RenderingHandler();
     int& getCurrentTopLine();

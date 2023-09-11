@@ -19,7 +19,10 @@ void InputHandler::initializeKeyDefinitions() {
 }
 
 void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
-    if (key == KEY_RESIZE) {}
+    bool doTextWrap = FALSE;
+    if (key == KEY_RESIZE) {
+        doTextWrap = TRUE;
+    }
     else if (key == KEY_ESC) {
         CommandHandler::processCommandInput(cursorXPos, cursorYPos);
     }
@@ -31,6 +34,7 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
         }
     }
     else if (key == KEY_RETURN) {
+        doTextWrap = TRUE;
         processReturn(cursorXPos, cursorYPos);
         if (selecting) {
             selecting = FALSE;
@@ -38,6 +42,7 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
         }
     }
     else if (key == KEY_BACKSPACE) {
+        doTextWrap = TRUE;
         processDelete(cursorXPos, cursorYPos);
         if (selecting) {
             selecting = FALSE;
@@ -45,6 +50,7 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
         }
     }
     else if (key == KEY_TAB) {
+        doTextWrap = TRUE;
         processTab(cursorXPos, cursorYPos);
         if (selecting) {
             selecting = FALSE;
@@ -56,29 +62,41 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
         processShiftedArrowKey(key, cursorXPos, cursorYPos);
     }
     else {
+        doTextWrap = TRUE;
         InputHandler::processNormalKey(key, cursorXPos, cursorYPos);
         if (selecting) {
             selecting = FALSE;
             SelectionHandler::initializeSelectedIndices();
         }
     }
+    if (doTextWrap) {
+        handleTextWrap(cursorXPos, cursorYPos);
+    }
 }
 
 void InputHandler::processNormalKey(int key, int& cursorXPos, int& cursorYPos) {
     RenderingHandler* renderer = RenderingHandler::getInstance();
     int& currentTopLine = renderer->getCurrentTopLine();
-    std::vector<std::string>& buffer = renderer->getDocument()->getBuffer();
+    Document* doc = renderer->getDocument();
+    std::vector<std::string>& buffer = doc->getBuffer();
     char character = static_cast<char>(key);
     if (!selecting) {
         buffer[cursorYPos+currentTopLine].insert(cursorXPos, 1, character);
         cursorXPos++;
+        if (cursorXPos >= doc->getLineLength(cursorYPos+currentTopLine) && cursorYPos+currentTopLine < buffer.size()-1) {
+            cursorYPos++;
+            cursorXPos=0;
+            if (cursorYPos>LINES-1 && currentTopLine+LINES-1 < buffer.size()-1) {
+                currentTopLine++;
+            }
+        }
     }
     else {
         std::vector<std::vector<int>> selectedIndices = SelectionHandler::getSelectedIndices();
         int firstLine = selectedIndices[0][0];
         int lastLine = selectedIndices[1][0];
         std::string substrOne = buffer[firstLine].substr(0,selectedIndices[0][1]);
-        std::string substrTwo = buffer[lastLine].substr(selectedIndices[1][1], static_cast<int>(buffer[lastLine].size()));
+        std::string substrTwo = buffer[lastLine].substr(selectedIndices[1][1], buffer[lastLine].length());
         for (int i = firstLine; i <= lastLine; i++) {
             buffer.erase(buffer.begin() + firstLine);
         }
@@ -101,7 +119,7 @@ void InputHandler::processTab(int& cursorXPos, int& cursorYPos) {
         int firstLine = selectedIndices[0][0];
         int lastLine = selectedIndices[1][0];
         std::string substrOne = buffer[firstLine].substr(0,selectedIndices[0][1]);
-        std::string substrTwo = buffer[lastLine].substr(selectedIndices[1][1], static_cast<int>(buffer[lastLine].size()));
+        std::string substrTwo = buffer[lastLine].substr(selectedIndices[1][1], buffer[lastLine].length());
         for (int i = firstLine; i <= lastLine; i++) {
             buffer.erase(buffer.begin() + firstLine);
         }
@@ -116,27 +134,16 @@ void InputHandler::processReturn(int& cursorXPos, int& cursorYPos) {
     int& currentTopLine = renderer->getCurrentTopLine();
     std::vector<std::string>& buffer = renderer->getDocument()->getBuffer();
     if (!selecting) {
-        bool cursorAtEndOfLine = (static_cast<int>(buffer[cursorYPos + currentTopLine].size()) == cursorXPos);
-        if (cursorAtEndOfLine) {
-            cursorYPos++;
-            cursorXPos = 0;
-            buffer.insert(buffer.begin() + cursorYPos + currentTopLine, " ");
-            if (cursorYPos>LINES-1 && currentTopLine+LINES-1 != buffer.size()-1) {
-                currentTopLine++;
-                cursorYPos=LINES-1;
-            }
-        }
-        else {
-            std::string substringOne = buffer[cursorYPos+currentTopLine].substr(0,cursorXPos);
-            std::string substringTwo = buffer[cursorYPos+currentTopLine].substr(cursorXPos, static_cast<int>(buffer[cursorYPos + currentTopLine].size()));
-            buffer[cursorYPos + currentTopLine] = substringOne;
-            cursorYPos++;
-            cursorXPos=0;
-            buffer.insert(buffer.begin() + cursorYPos + currentTopLine, substringTwo);
-            if (cursorYPos>LINES-1) {
-                currentTopLine++;
-                cursorYPos=LINES-1;
-            }
+        std::string substringOne = buffer[cursorYPos+currentTopLine].substr(0,cursorXPos);
+        substringOne += "\n";
+        std::string substringTwo = buffer[cursorYPos+currentTopLine].substr(cursorXPos, buffer[cursorYPos + currentTopLine].length());
+        buffer[cursorYPos + currentTopLine] = substringOne;
+        cursorYPos++;
+        cursorXPos=0;
+        buffer.insert(buffer.begin() + cursorYPos + currentTopLine, substringTwo);
+        if (cursorYPos>LINES-1) {
+            currentTopLine++;
+            cursorYPos=LINES-1;
         }
     }
     else {
@@ -144,7 +151,8 @@ void InputHandler::processReturn(int& cursorXPos, int& cursorYPos) {
         int firstLine = selectedIndices[0][0];
         int lastLine = selectedIndices[1][0];
         std::string substrOne = buffer[firstLine].substr(0,selectedIndices[0][1]);
-        std::string substrTwo = buffer[lastLine].substr(selectedIndices[1][1], static_cast<int>(buffer[lastLine].size()));
+        substrOne += "\n";
+        std::string substrTwo = buffer[lastLine].substr(selectedIndices[1][1], buffer[lastLine].length());
         for (int i = firstLine; i <= lastLine; i++) {
             buffer.erase(buffer.begin() + firstLine);
         }
@@ -168,14 +176,14 @@ void InputHandler::processDelete(int& cursorXPos, int& cursorYPos) {
             std::string line = buffer[cursorYPos + currentTopLine];
             buffer.erase(buffer.begin() + cursorYPos + currentTopLine);
             cursorYPos--;
-            cursorXPos = static_cast<int>(buffer[cursorYPos + currentTopLine].size());
+            cursorXPos = buffer[cursorYPos + currentTopLine].length();
             buffer[cursorYPos + currentTopLine] += line;
         }
         else if (cursorXPos == 0 && cursorYPos == 0 && currentTopLine != 0) {
             std::string line = buffer[cursorYPos + currentTopLine];
             buffer.erase(buffer.begin() + cursorYPos + currentTopLine);
             currentTopLine--;
-            cursorXPos = static_cast<int>(buffer[cursorYPos + currentTopLine].size());
+            cursorXPos = buffer[cursorYPos + currentTopLine].length();
             buffer[cursorYPos + currentTopLine] += line;
         }
     }
@@ -184,7 +192,7 @@ void InputHandler::processDelete(int& cursorXPos, int& cursorYPos) {
         int firstLine = selectedIndices[0][0];
         int lastLine = selectedIndices[1][0];
         std::string substrOne = buffer[firstLine].substr(0,selectedIndices[0][1]);
-        std::string substrTwo = buffer[lastLine].substr(selectedIndices[1][1], static_cast<int>(buffer[lastLine].size()));
+        std::string substrTwo = buffer[lastLine].substr(selectedIndices[1][1], buffer[lastLine].length());
         for (int i = firstLine; i <= lastLine; i++) {
             buffer.erase(buffer.begin() + firstLine);
         }
@@ -197,7 +205,8 @@ void InputHandler::processDelete(int& cursorXPos, int& cursorYPos) {
 void InputHandler::processArrowKey(int key, int& cursorXPos, int& cursorYPos) {
     RenderingHandler* renderer = RenderingHandler::getInstance();
     int& currentTopLine = renderer->getCurrentTopLine();
-    std::vector<std::string>& buffer = renderer->getDocument()->getBuffer();
+    Document* doc = renderer->getDocument();
+    std::vector<std::string>& buffer = doc->getBuffer();
     if (key == KEY_UP || key == KEY_SUP) {
         cursorYPos--;
         if (cursorYPos<0 && currentTopLine != 0) {
@@ -210,7 +219,7 @@ void InputHandler::processArrowKey(int key, int& cursorXPos, int& cursorYPos) {
         }
     } else if (key == KEY_RIGHT || key == KEY_SRIGHT) {
         cursorXPos++;
-        if (cursorXPos > buffer[cursorYPos+currentTopLine].length() && cursorYPos+currentTopLine != buffer.size()-1) {
+        if (cursorXPos > doc->getLineLength(cursorYPos+currentTopLine) && cursorYPos+currentTopLine < buffer.size()-1) {
             cursorYPos++;
             cursorXPos=0;
             if (cursorYPos>LINES-1 && currentTopLine+LINES-1 < buffer.size()-1) {
@@ -221,14 +230,14 @@ void InputHandler::processArrowKey(int key, int& cursorXPos, int& cursorYPos) {
         cursorXPos--;
         if (cursorXPos<0 && (currentTopLine != 0 || cursorYPos != 0)) {
             cursorYPos--;
-            cursorXPos=buffer[cursorYPos+currentTopLine].length();
+            cursorXPos=doc->getLineLength(cursorYPos+currentTopLine);
             if (cursorYPos<0 && currentTopLine != 0) {
                 currentTopLine--;
             }
         }
     }
     cursorYPos = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(cursorYPos, LINES-1)));
-    cursorXPos = std::max(0, std::min(cursorXPos, static_cast<int>(buffer[cursorYPos+currentTopLine].size())));
+    cursorXPos = std::max(0, std::min(cursorXPos, doc->getLineLength(cursorYPos+currentTopLine)));
 }
 
 void InputHandler::processShiftedArrowKey(int key, int& cursorXPos, int& cursorYPos) {
@@ -245,4 +254,31 @@ int InputHandler::collectInput() {
     RenderingHandler* renderer = RenderingHandler::getInstance();
     int input = wgetch(renderer->getWindow());
     return input;
+}
+
+void InputHandler::handleTextWrap(int& cursorXPos, int& cursorYPos) {
+    RenderingHandler* renderer = RenderingHandler::getInstance();
+    Document* doc = renderer->getDocument();
+    std::vector<std::string> buffer = doc->getBuffer();
+    int& currentTopLine = renderer->getCurrentTopLine();
+    int distanceIntoDoc = 0;
+    int i = 0;
+    while (i < cursorYPos+currentTopLine) {
+        distanceIntoDoc += doc->getLineLength(i);
+        i++;
+    }
+    distanceIntoDoc += cursorXPos;
+    doc->resizeTextBuffer(COLS);
+    int charactersIn = 0;   
+    int newY = 0;
+    while (TRUE) {
+        charactersIn += doc->getLineLength(newY);
+        if (charactersIn >= distanceIntoDoc) {
+            charactersIn -= doc->getLineLength(newY);
+            break;
+        }
+        newY++;
+    }
+    cursorXPos = distanceIntoDoc-charactersIn;
+    currentTopLine = newY-cursorYPos;
 }

@@ -17,6 +17,7 @@ void Document::openDoc() {
     if (inputFile.is_open()) {
         std::string line;
         while (getline(inputFile, line)) {
+            line += "\n";
             this->textBuffer.push_back(line);
         }
         inputFile.close();
@@ -30,7 +31,7 @@ void Document::saveDoc() const {
     std::ofstream outputFile(this->filename);
     if (outputFile.is_open()) {
         for (const std::string& line : this->textBuffer) {
-            outputFile << line << "\n";
+            outputFile << line;
         }
         outputFile.close();
     }
@@ -40,6 +41,46 @@ std::vector<std::string>& Document::getBuffer() {
     return this->textBuffer;
 }
 
-int Document::getLength() const {
-    return this->textBuffer.size();
+int Document::getLineLength(int lineNum) {
+    if (this->textBuffer[lineNum].back() == '\n') {
+        return this->textBuffer[lineNum].length() - 1;
+    }
+    return this->textBuffer[lineNum].length();
+}
+
+std::vector<std::string> Document::splitString(std::string stringToSplit, int size) {
+    std::vector<std::string> returnVec;
+    for (int i = 0; i < stringToSplit.length(); i += size) {
+        returnVec.push_back(stringToSplit.substr(i, size));
+    }
+    return returnVec;
+}
+
+void Document::resizeTextBuffer(int cols) {
+    int numBufferLines = this->textBuffer.size();
+    std::vector<std::string> tempBuffer;
+    std::string line = "";
+    for (int i = 0; i < numBufferLines; i++) {
+        line += this->textBuffer[i];
+        if (line.back() == '\n') {
+            tempBuffer.push_back(line);
+            line = "";
+        }
+    }
+
+    cols = cols-1;
+    int currentOffset = 0;
+    int numTempLines = tempBuffer.size();
+    for (int i = 0; i < numTempLines; i++) {
+        std::string line = tempBuffer[i+currentOffset];
+        if (line.length() > cols) {
+            std::vector<std::string> splitStrings = splitString(line, cols);
+            tempBuffer[i+currentOffset] = splitStrings[0];
+            for (int j = 1; j < splitStrings.size(); j++) {
+                currentOffset++;
+                tempBuffer.insert(tempBuffer.begin() + i + currentOffset, splitStrings[j]);
+            }
+        }
+    }
+    this->textBuffer = tempBuffer;
 }

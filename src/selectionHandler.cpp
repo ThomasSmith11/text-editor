@@ -11,7 +11,8 @@ void SelectionHandler::calcUpIndices(int x, int y) {
     int newx;
     int& currentTopLine = renderer->getCurrentTopLine();
     int faketopline = currentTopLine;
-    std::vector<std::string>& buffer = renderer->getDocument()->getBuffer();
+    Document* doc = renderer->getDocument();
+    std::vector<std::string>& buffer = doc->getBuffer();
     if (selectedIndices[0][0] == -1) {
         selectedIndices[1][0] = y + faketopline;
         selectedIndices[1][1] = x;
@@ -21,7 +22,7 @@ void SelectionHandler::calcUpIndices(int x, int y) {
             faketopline--;
         }
         newy = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(newy, LINES-1)));
-        newx = std::max(0, std::min(newx, static_cast<int>(buffer[newy+faketopline].size())));
+        newx = std::max(0, std::min(newx, doc->getLineLength(newy+faketopline)));
         selectedIndices[0][0] = newy + faketopline;
         selectedIndices[0][1] = newx;
     }
@@ -32,7 +33,7 @@ void SelectionHandler::calcUpIndices(int x, int y) {
             faketopline--;
         }
         newy = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(newy, LINES-1)));
-        newx = std::max(0, std::min(newx, static_cast<int>(buffer[newy+faketopline].size())));
+        newx = std::max(0, std::min(newx, doc->getLineLength(newy+faketopline)));
         selectedIndices[0][0] = newy + faketopline;
         selectedIndices[0][1] = newx;
     }
@@ -43,7 +44,7 @@ void SelectionHandler::calcUpIndices(int x, int y) {
             faketopline--;
         }
         newy = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(newy, LINES-4)));
-        newx = std::max(0, std::min(newx, static_cast<int>(buffer[newy+faketopline].size())));
+        newx = std::max(0, std::min(newx, doc->getLineLength(newy+faketopline)));
         if (newy + faketopline < selectedIndices[0][0] || (newx < selectedIndices[0][1] && newy + faketopline == selectedIndices[0][0])) {
             selectedIndices[1][0] = selectedIndices[0][0];
             selectedIndices[1][1] = selectedIndices[0][1];
@@ -67,7 +68,8 @@ void SelectionHandler::calcDownIndices(int x, int y) {
     int newx;
     int& currentTopLine = renderer->getCurrentTopLine();
     int faketopline = currentTopLine;
-    std::vector<std::string>& buffer = renderer->getDocument()->getBuffer();
+    Document* doc = renderer->getDocument();
+    std::vector<std::string>& buffer = doc->getBuffer();
     if (selectedIndices[0][0] == -1) {
         selectedIndices[0][0] = y + faketopline;
         selectedIndices[0][1] = x;
@@ -77,7 +79,7 @@ void SelectionHandler::calcDownIndices(int x, int y) {
             faketopline++;
         }
         newy = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(newy, LINES-1)));
-        newx = std::max(0, std::min(newx, static_cast<int>(buffer[newy+faketopline].size())));
+        newx = std::max(0, std::min(newx, doc->getLineLength(newy+faketopline)));
         selectedIndices[1][0] = newy + faketopline;
         selectedIndices[1][1] = newx;
     }
@@ -88,7 +90,7 @@ void SelectionHandler::calcDownIndices(int x, int y) {
             faketopline++;
         }
         newy = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(newy, LINES-1)));
-        newx = std::max(0, std::min(newx, static_cast<int>(buffer[newy+faketopline].size())));
+        newx = std::max(0, std::min(newx, doc->getLineLength(newy+faketopline)));
         selectedIndices[1][0] = newy + faketopline;
         selectedIndices[1][1] = newx;
     }
@@ -99,7 +101,7 @@ void SelectionHandler::calcDownIndices(int x, int y) {
             faketopline++;
         }
         newy = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(newy, LINES-1)));
-        newx = std::max(0, std::min(newx, static_cast<int>(buffer[newy+faketopline].size())));
+        newx = std::max(0, std::min(newx, doc->getLineLength(newy+faketopline)));
         if (newy + faketopline > selectedIndices[1][0] || (newx > selectedIndices[1][1] && newy + faketopline == selectedIndices[1][0])) {
             selectedIndices[0][0] = selectedIndices[1][0];
             selectedIndices[0][1] = selectedIndices[1][1];
@@ -123,13 +125,14 @@ void SelectionHandler::calcRightIndices(int x, int y) {
     int newx;
     int& currentTopLine = renderer->getCurrentTopLine();
     int faketopline = currentTopLine;
-    std::vector<std::string>& buffer = renderer->getDocument()->getBuffer();
+    Document* doc = renderer->getDocument();
+    std::vector<std::string>& buffer = doc->getBuffer();
     if (selectedIndices[0][0] == -1) {
         selectedIndices[0][0] = y + faketopline;
         selectedIndices[0][1] = x;
         newx = x+1;
         newy = y;
-        if (newx>buffer[newy+faketopline].length() && newy+faketopline != buffer.size()-1) {
+        if (newx>doc->getLineLength(newy+faketopline) && newy+faketopline != buffer.size()-1) {
             newy++;
             newx=0;
             if (newy>LINES-1 && faketopline+LINES-1 < buffer.size()-1) {
@@ -137,14 +140,14 @@ void SelectionHandler::calcRightIndices(int x, int y) {
             }
         }
         newy = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(newy, LINES-1)));
-        newx = std::max(0, std::min(newx, static_cast<int>(buffer[newy+faketopline].size())));
+        newx = std::max(0, std::min(newx, doc->getLineLength(newy+faketopline)));
         selectedIndices[1][0] = newy + faketopline;
         selectedIndices[1][1] = newx;
     }
     else if (y+faketopline == selectedIndices[1][0] && x == selectedIndices[1][1]) {
         newx = x+1;
         newy = y;
-        if (newx>buffer[newy+faketopline].length() && newy+faketopline != buffer.size()-1) {
+        if (newx>doc->getLineLength(newy+faketopline) && newy+faketopline != buffer.size()-1) {
             newy++;
             newx=0;
             if (newy>LINES-1 && faketopline+LINES-1 < buffer.size()-1) {
@@ -152,14 +155,14 @@ void SelectionHandler::calcRightIndices(int x, int y) {
             }
         }
         newy = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(newy, LINES-1)));
-        newx = std::max(0, std::min(newx, static_cast<int>(buffer[newy+faketopline].size())));
+        newx = std::max(0, std::min(newx, doc->getLineLength(newy+faketopline)));
         selectedIndices[1][0] = newy + faketopline;
         selectedIndices[1][1] = newx;
     }
     else {
         newx = x+1;
         newy = y;
-        if (newx>buffer[newy+faketopline].length() && newy+faketopline != buffer.size()-1) {
+        if (newx>doc->getLineLength(newy+faketopline) && newy+faketopline != buffer.size()-1) {
             newy++;
             newx=0;
             if (newy>LINES-1 && faketopline+LINES-1 < buffer.size()-1) {
@@ -167,7 +170,7 @@ void SelectionHandler::calcRightIndices(int x, int y) {
             }
         }
         newy = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(newy, LINES-1)));
-        newx = std::max(0, std::min(newx, static_cast<int>(buffer[newy+faketopline].size())));
+        newx = std::max(0, std::min(newx, doc->getLineLength(newy+faketopline)));
         selectedIndices[0][0] = newy + faketopline;
         selectedIndices[0][1] = newx;
     }
@@ -183,7 +186,8 @@ void SelectionHandler::calcLeftIndices(int x, int y) {
     int newx;
     int& currentTopLine = renderer->getCurrentTopLine();
     int faketopline = currentTopLine;
-    std::vector<std::string>& buffer = renderer->getDocument()->getBuffer();
+    Document* doc = renderer->getDocument();
+    std::vector<std::string>& buffer = doc->getBuffer();
     if (selectedIndices[0][0] == -1) {
         selectedIndices[1][0] = y + faketopline;
         selectedIndices[1][1] = x;
@@ -191,13 +195,13 @@ void SelectionHandler::calcLeftIndices(int x, int y) {
         newy = y;
         if (newx<0 && (faketopline != 0 || newy != 0)) {
             newy--;
-            newx=buffer[newy+faketopline].length();
+            newx=doc->getLineLength(newy+faketopline);
             if (newy<0 && faketopline != 0) {
                 faketopline--;
             }
         }
         newy = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(newy, LINES-1)));
-        newx = std::max(0, std::min(newx, static_cast<int>(buffer[newy+faketopline].size())));
+        newx = std::max(0, std::min(newx, doc->getLineLength(newy+faketopline)));
         selectedIndices[0][0] = newy + faketopline;
         selectedIndices[0][1] = newx;
     }
@@ -206,13 +210,13 @@ void SelectionHandler::calcLeftIndices(int x, int y) {
         newy = y;
         if (newx<0 && (faketopline != 0 || newy != 0)) {
             newy--;
-            newx=buffer[newy+faketopline].length();
+            newx=doc->getLineLength(newy+faketopline);
             if (newy<0 && faketopline != 0) {
                 faketopline--;
             }
         }
         newy = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(newy, LINES-1)));
-        newx = std::max(0, std::min(newx, static_cast<int>(buffer[newy+faketopline].size())));
+        newx = std::max(0, std::min(newx, doc->getLineLength(newy+faketopline)));
         selectedIndices[0][0] = newy + faketopline;
         selectedIndices[0][1] = newx;
     }
@@ -221,13 +225,13 @@ void SelectionHandler::calcLeftIndices(int x, int y) {
         newy = y;
         if (newx<0 && (faketopline != 0 || newy != 0)) {
             newy--;
-            newx=buffer[newy+faketopline].length();
+            newx=doc->getLineLength(newy+faketopline);
             if (newy<0 && faketopline != 0) {
                 faketopline--;
             }
         }
         newy = std::max(0, std::min(static_cast<int>(buffer.size())-1, std::min(newy, LINES-1)));
-        newx = std::max(0, std::min(newx, static_cast<int>(buffer[newy+faketopline].size())));
+        newx = std::max(0, std::min(newx, doc->getLineLength(newy+faketopline)));
         selectedIndices[1][0] = newy + faketopline;
         selectedIndices[1][1] = newx;
     }

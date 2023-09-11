@@ -29,6 +29,7 @@ RenderingHandler::~RenderingHandler() {
 
 void RenderingHandler::setDocument(Document* doc) {
     this->document = doc;
+    initiallyResize();
 }
 
 Document* RenderingHandler::getDocument() {
@@ -55,12 +56,15 @@ void RenderingHandler::renderDoc(int linesToRemove) {
     wclear(this->window);
     int linesToPrint = LINES-linesToRemove;
     int i = 0;
+    std::vector<std::string> buffer = this->document->getBuffer();
     while (i < linesToPrint) {
-        if (i >= static_cast<int>(this->document->getBuffer().size())) {
+        if (this->currentTopLine + i >= static_cast<int>(buffer.size())) {
             break;
         }
-        std::string line = this->document->getBuffer()[this->currentTopLine + i];
-        line += "\n";
+        std::string line = buffer[this->currentTopLine + i];
+        if (line.empty() || line.back() != '\n') {
+            line += "\n";
+        }
         const char* cStr = line.c_str();
         wchgat(this->window, line.length(), A_NORMAL, 0, NULL);
         wprintw(this->window, "%s", cStr);
@@ -135,4 +139,8 @@ void RenderingHandler::displayHighlightedSearchTerm(std::string searchTerm, int&
     wchgat(this->window, length, A_STANDOUT, 0, NULL);	
     cursorXPos += length;
     wmove(this->window, cursorYPos, cursorXPos);
+}
+
+void RenderingHandler::initiallyResize() {
+    this->document->resizeTextBuffer(COLS);
 }

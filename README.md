@@ -1,6 +1,6 @@
 A simple text editor with limited functionality to learn to write in C++
 
-Tested only on a 2013 Macbook Pro running Linux Mint 21.1 Cinnamon.
+Tested on a 2013 Macbook Pro running Linux Mint 21.1 and a 2020 Macbook Pro running MacOS Ventura 13.3.1 (macOS requires changing KEY_BACKSPACE in inputHandler to 127).
 
 Has functionality for editing and saving files, as well as searching, cutting, copying, and pasting.
 

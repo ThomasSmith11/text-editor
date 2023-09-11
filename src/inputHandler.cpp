@@ -19,9 +19,11 @@ void InputHandler::initializeKeyDefinitions() {
 }
 
 void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
+    bool moveCursorInResize = FALSE;
     bool resizing = FALSE;
     bool doTextWrap = FALSE;
     if (key == KEY_RESIZE) {
+        moveCursorInResize = TRUE;
         resizing = TRUE;
         doTextWrap = TRUE;
     }
@@ -44,6 +46,7 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
         }
     }
     else if (key == KEY_BACKSPACE) {
+        moveCursorInResize = TRUE;
         doTextWrap = TRUE;
         processDelete(cursorXPos, cursorYPos);
         if (selecting) {
@@ -52,7 +55,7 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
         }
     }
     else if (key == KEY_TAB) {
-        resizing = TRUE;
+        moveCursorInResize = TRUE;
         doTextWrap = TRUE;
         processTab(cursorXPos, cursorYPos);
         if (selecting) {
@@ -65,7 +68,7 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
         processShiftedArrowKey(key, cursorXPos, cursorYPos);
     }
     else {
-        resizing = TRUE;
+        moveCursorInResize = TRUE;
         doTextWrap = TRUE;
         InputHandler::processNormalKey(key, cursorXPos, cursorYPos);
         if (selecting) {
@@ -74,7 +77,7 @@ void InputHandler::processKeyInput(int key, int& cursorXPos, int& cursorYPos) {
         }
     }
     if (doTextWrap) {
-        handleTextWrap(cursorXPos, cursorYPos, resizing);
+        handleTextWrap(cursorXPos, cursorYPos, moveCursorInResize, resizing);
     }
 }
 
@@ -260,13 +263,13 @@ int InputHandler::collectInput() {
     return input;
 }
 
-void InputHandler::handleTextWrap(int& cursorXPos, int& cursorYPos, bool resizing) {
+void InputHandler::handleTextWrap(int& cursorXPos, int& cursorYPos, bool moveCursorInResize, bool resizing) {
     RenderingHandler* renderer = RenderingHandler::getInstance();
     Document* doc = renderer->getDocument();
     //calculate how far into doc cursor is before resizing buffer
     int distanceIntoDoc;
     int& currentTopLine = renderer->getCurrentTopLine();
-    if (resizing) {
+    if (moveCursorInResize) {
         distanceIntoDoc = 0;
         int i = 0;
         while (i < cursorYPos+currentTopLine) {
@@ -278,11 +281,11 @@ void InputHandler::handleTextWrap(int& cursorXPos, int& cursorYPos, bool resizin
     //do resize
     doc->resizeTextBuffer(COLS);
     //move cursor to correct location in resized buffer
-    if (resizing) {
+    if (moveCursorInResize) {
         int charactersIn = 0;   
         int newY = 0;
         while (TRUE) {
-            charactersIn += doc->getLineLength(newY); //This line is where the line number too large for the buffer is passed in
+            charactersIn += doc->getLineLength(newY);
             if (charactersIn >= distanceIntoDoc) {
                 charactersIn -= doc->getLineLength(newY);
                 break;
@@ -290,7 +293,9 @@ void InputHandler::handleTextWrap(int& cursorXPos, int& cursorYPos, bool resizin
             newY++;
         }
         cursorXPos = distanceIntoDoc-charactersIn;
-        currentTopLine = newY-cursorYPos;
+        if (resizing) {
+            currentTopLine = std::max (0, currentTopLine+newY-cursorYPos);
+        }
         cursorYPos = newY;
     }
 }

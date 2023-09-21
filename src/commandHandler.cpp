@@ -77,7 +77,7 @@ void CommandHandler::doSearch(RenderingHandler* renderer, std::string searchTerm
     const std::regex expression(searchTerm, std::regex_constants::icase);
 
     int currentLine = 0;
-    std::vector<std::vector<int> > matches;
+    std::vector<std::vector<int>> matches;
     for (std::string line : buffer) {
         std::smatch m;
         while (std::regex_search(line, m, expression)) {
@@ -93,7 +93,7 @@ void CommandHandler::doSearch(RenderingHandler* renderer, std::string searchTerm
 
     int nextChar = InputHandler::KEY_RETURN;
     while (TRUE) {
-        for (std::vector<int> match : matches) {
+        for (std::vector match : matches) {
             while (nextChar != InputHandler::KEY_RETURN && nextChar != InputHandler::KEY_ESC) {
                 nextChar = InputHandler::collectInput();
             }

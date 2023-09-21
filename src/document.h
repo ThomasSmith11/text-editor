@@ -10,11 +10,8 @@ public:
     void openDoc();
     void saveDoc() const;
     std::vector<std::string>& getBuffer();
-    void resizeTextBuffer(int cols);
-    int getLineLength(int lineNum);
-    
+    int getLength() const;
 private:
     const char* filename;
     std::vector<std::string> textBuffer;
-    std::vector<std::string> splitString(std::string stringToSplit, int size);
 };
